@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>register</title>
+</head>
+<body>
+
+	<form>
+		<input type="text" th:name="${_csrf.parameterName}"
+			th:value="${_csrf.token}">
+	</form>
+	[[${_csrf.parameterName}]]<hr>
+	[[${_csrf.token}]]<hr>
+	[[${_csrf.headerName}]]
+	
+	<script th:inline="javascript">
+	 let csrfHeaderName = 	[[${_csrf.headerName}]];
+	 let csrfToken=[[${_csrf.token}]];
+	 
+	
+	</script>
+
+</body>
+</html>
