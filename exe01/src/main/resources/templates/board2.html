@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+<!--  게시글 단건조회 시작 -->
+<div class="card mb-3">
+<div class="card-body">
+  <h5 class="card-title">토론상세</h5>
+  <table class="table text-center">
+<tr>
+    <td>bno</td>
+     <td th:text="${board.bno}">100</td>
+  </tr>
+  <tr>
+    <td>title</td>
+    <td>[[${board.title}]]</td>
+  </tr>
+  <tr>
+    <td>content</td>
+    <td th:text="${board.content}">내용</td>
+  </tr>
+   <tr>
+    <td>writer</td>
+    <td th:text="${board.writer}">작성자</td>
+  </tr>
+  <tr>
+    <td>regdate</td>
+    <td th:text="${#dates.format(board.regdate,'yyyy-MM-dd HH:mm:ss')}">2000</td>
+  </tr>
+</table>
+<!--  게시글 단건조회 끝 -->
+  </div>
+  </div>
+<div>
+
+<div class="card mb-3">
+<div class="card-body">
+<!--  댓글등록시작 -->
+<form name="replyForm">
+	<input name="reply" placeholder="작성내용">
+	<input name="replyer" placeholder="작성자">
+	<input name="bno" type="hidden" th:value="${board.bno}">
+	<button type="button" class="btnReplyInsert">댓글저장</button>
+</form>
+</div>
+</div>
+
+<div class="card">
+<div class="card-body">
+<!--  댓글등록끝 -->
+<h5 class="card-title">댓글목록</h5>
+<!--  댓글시작 -->
+ <div id="replyList" class="replys">
+   <div class="row boarder">
+    <div class="col-lg-2 text-danger">홍길동</div>
+    <div class="col-lg-6 ">댓글잘부탁합니다.....</div>
+    <div class="col-lg-4 "><button>수정</button><button></button></div>
+  </div>
+ </div>
+<!--  댓글끝 -->
+</div>
+</div>
+</div>
+</div>
+</body>
+<script>
+const url = "/reply";//공통uri
+replyDelete();
+replyInsert();
+replyList();
+replyUpdateForm();
+replyUpdate();
+replyCancel();
+
+/*-------------------------------------
+등록 버튼 이벤트 지정
+---------------------------------------*/	
+function replyInsert(){
+	document.querySelector(".btnReplyInsert").addEventListener("click", function(){
+
+		//파라미터 만들기
+		const reply = replyForm.reply.value;
+		const replyer = replyForm.replyer.value;
+		const bno = replyForm.bno.value;
+		const param = {reply, replyer, bno}//reply:reply(필드와 변수 동일하면 생략)
+		
+		//등록 요청
+		fetch(url, {
+			method:"post",
+			headers: {
+			      "Content-Type": "application/json",
+			      // 'Content-Type': 'application/x-www-form-urlencoded',
+			    },
+			body : JSON.stringify(param), 
+		})
+		.then( result => result.text() )//text or json
+		.then( result => alert(result) )//true 1 vo
+		.then( result => replyList() )
+	})
+} 
+//댓글조회
+function replyList(){
+	const bno = replyForm.bno.value;
+	fetch(`/board/${bno}/reply`)
+	.then( result => result.json() )
+	.then( result => replyListCallback(result) )
+}
+
+
+/*-------------------------------------
+댓글 조회 콜백
+---------------------------------------*/
+function replyListCallback(result){
+	const replys = document.querySelector(".replys");
+	replys.innerHTML = "";
+	result.forEach(item => replys.insertAdjacentElement("beforeend", replyMake(item)) );
+}
+
+/*-------------------------------------
+댓글 조회 태그 생성
+---------------------------------------*/
+function replyMake(item){
+	let tag = document.createElement("div");
+	tag.className = "row mt-2";
+	tag.innerHTML = `
+        <div class="col-6">${item.reply}</div>
+        <div class="col-3">${item.replyer}</div>
+        <div class="col-3">
+          <button type="button"
+                  data-rno="${item.rno}" 
+                  class="btn btn-success btnReplyUpdateForm">수정</button>			                           
+          <button type="button"
+                  data-rno="${item.rno}" 
+                  class="btn btn-danger btnReplyDelete">삭제</button>
+        </div>`;
+    return tag;    
+}
+/*-------------------------------------
+댓글 삭제 ajax 호출
+---------------------------------------*/
+function replyDelete(){
+	document.querySelector(".replys").addEventListener("click", function(){
+		//삭제버튼이면
+		if(event.target.classList.contains("btnReplyDelete")) {
+			if(! confirm("삭제할까요")){
+				return;
+			}
+			// 버튼을 포함하는 부모태그
+			const div = event.target.closest(".row");
+			// 삭제할 댓글번호 
+			const rno = event.target.dataset.rno;
+			// 서버 삭제 요청
+			fetch(`/reply/${rno}`, {method:"delete"})
+			.then(result => result.text())
+			.then(result => div.remove() )
+		}
+	})
+}
+/*-------------------------------------
+수정폼 버튼 이벤트 지정
+---------------------------------------*/	
+function replyUpdateForm(){
+
+	document.querySelector(".replys").addEventListener("click", function(){
+		//수정 폼 버튼이면
+		if(event.target.classList.contains("btnReplyUpdateForm")) {
+			// 버튼을 포함하는 부모태그
+			const div = event.target.closest(".row");
+			
+			// 수정할 데이터 
+			const rno = event.target.dataset.rno;
+			const reply = div.children[0].innerHTML;
+			const replyer = div.children[1].innerHTML;
+		
+			const item = {rno, reply, replyer};
+			
+			// 수정폼으로 변경
+			div.replaceWith( replyFormMake(item) );	
+		}
+	})	
+} 
+
+/*-------------------------------------
+수정폼 태그 생성
+---------------------------------------*/
+function replyFormMake(item){
+	let tag = document.createElement("div");
+	tag.className = "replyUpdateForm row mt-2 border";
+	tag.innerHTML = `
+        <div class="col-3"><input id="replyer" value="${item.replyer}" data-value="${item.replyer}" readonly></div>
+        <div class="col-6"><input id="reply" value="${item.reply}" data-value="${item.reply}"></div>
+        <div class="col-3">
+        <button type="button"
+                data-rno="${item.rno}" 
+                class="btn btn-danger btnReplyCancel">취소</button>
+        <button type="button"
+            data-rno="${item.rno}" 
+            class="btn btn-success btnReplyUpdate">저장</button>			                           
+      </div>`;
+    return tag;  
+}
+
+
+/*-------------------------------------
+수정 버튼 이벤트 지정
+---------------------------------------*/	
+function replyUpdate(){
+	document.querySelector(".replys").addEventListener("click", function(event){
+		if(event.target.classList.contains("btnReplyUpdate")) {
+			const div = event.target.closest(".replyUpdateForm");
+			const rno = event.target.dataset.rno;
+			const reply = div.querySelector("#reply").value;
+			const replyer = div.querySelector("#replyer").value;
+			const param = {
+				rno: rno,
+				reply: reply,
+				replyer: replyer
+			};
+			
+			fetch(`/reply/${rno}`, {
+				method: "PUT", // PUT 메서드로 변경
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(param)
+			})
+			.then(result => result.text())
+			.then(result => {
+				if (result > 0) { // 서버에서 반환된 수정된 행의 개수 확인
+					replyList(); // 댓글 목록을 다시 불러와서 화면 갱신
+				} else {
+					alert("댓글 수정에 실패했습니다.");
+				}
+			})
+			.catch(error => {
+				console.error("Error:", error);
+				alert("댓글 수정 중 오류가 발생했습니다.");
+			});
+		}
+	});	
+} 
+
+/*-------------------------------------
+취소 버튼 이벤트 지정
+---------------------------------------*/	
+function replyCancel(){
+	document.querySelector(".replys").addEventListener("click", function(){
+		//수정 폼 버튼이면
+		if(event.target.classList.contains("btnReplyCancel")) {
+			// 버튼을 포함하는 부모태그
+			const div = event.target.closest(".row");
+			
+			// 수정할 데이터 
+			const rno = event.target.dataset.rno;
+			const reply = div.querySelector("#reply").dataset.value;
+			const replyer = div.querySelector("#replyer").dataset.value;
+		
+			const item = {rno, reply, replyer};
+			
+			// 수정폼으로 변경
+			div.replaceWith( replyMake(item) );
+			
+		} //end of if
+	}) // end of addEvent 		
+} //end of function
+</script>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+ <html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout}" >
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+ table {border-collapse: collapse;}
+ table th, table td{border:1px solid black;}
+</style>
+</head>
+<body layout:fragment="content">
+ <h1>사원정보</h1>
+     <table >
+      <tr>
+        <td>No</td>
+         <td th:text="${emp.employeeId}">100</td>
+      </tr>
+      <tr>
+        <td>이름</td>
+        <td>[[${emp.firstName}]] [[${emp.lastName}]]</td>
+       <!-- <td th:text="${emp.firstName} + ${emp.lastName}">길동</td> -->
+      </tr>
+      <tr>
+        <td>급여</td>
+        <td th:text="${#numbers.formatCurrency(emp.salary)}">2000</td>
+      </tr>
+      <tr>
+        <td>입사일자</td>
+        <td th:text="${#dates.format(emp.hireDate,'yyyy-MM')}">2000</td>
+      </tr>
+      <tr>
+        <td>부서이름</td>
+       <td th:text="${emp.deptVO.departmentName}"></td>
+      </tr>
+    </table>
+</body>
+</html>

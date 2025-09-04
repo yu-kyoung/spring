@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- <html xmlns:th="http://www.thymeleaf.org">-->
+ <html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout}" >
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">-->
+ <script>
+ 	function gopage(p){
+		frmSearch.page.value = p;
+		frmSearch.submit();
+		//location.href= 'empList?page=' + p
+	}
+	function init(){
+		frmSearch.title.value=""
+		frmSearch.writer.value=""
+		//초기화 시 목록 첫페이지 불러오는 부분
+	    gopage(1);
+	}
+ </script>
+</head>
+<body layout:fragment="content">
+ <h1>토론목록내역</h1>
+ <form name="frmSearch" th:object="${boardVO}" action="boardList">
+		<input type="hidden" name="page">
+		<!-- <select name="bno" th:value="*{bno}">
+		<option value="">선택
+			<option value="10" th:selected="*{bno}=='10'">10
+			<option value="20" th:selected="*{bno}=='20'">20
+			<option value="50" th:selected="*{bno}=='50'">50	
+			<option value="60" th:selected="*{bno}=='60'">60	
+			<option value="80" th:selected="*{bno}=='80'">80	
+			<option value="90" th:selected="*{bno}=='90'">90	
+			<option value="110" th:selected="*{bno}=='100'">100
+		</select>-->
+		title<input name="title" th:value="*{title}">
+		writer<input name="writer" th:value="*{writer}">
+		<button type="button" onclick="gopage(1)">검색</button>
+		<button type="button" onclick="init()">초기화</button>
+	</form>
+ <table class="table">
+  <tr>
+    <th>bno</th>
+    <th>title</th>
+    <th>content</th>
+    <th>writer</th>
+    <th>regdate</th>
+    <th>updatedate</th>
+    <th>삭제</th>
+  </tr>
+  <tr th:each="boards,stat: ${boardList}">
+    <td th:text="${boards.bno}"></td>
+    <td><a th:href="@{/board(bno=${boards.bno})}" th:text="${boards.title}">제목</a></td>
+    <td th:text="${boards.content}"></td>
+    <td th:text="${boards.writer}"></td>
+    <td th:text="${#dates.format(boards.regdate, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</td>
+    <td th:text="${#dates.format(boards.updatedate, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01</td>
+    <td>
+    	<button class="btn btn-danger btn-sm" type="button" onclick="">삭제</button>
+    </td>
+  </tr>
+  
+ </table>
+  <!-- 페이징 시작 -->
+	<nav aria-label="...">
+	  <ul class="pagination">
+	    <li class="page-item" th:if="${paging.startPage} > 1 ">
+	        <a class="page-link" th:href="|javascript:gopage(${paging.startPage-1})|">Previous</a></li>
+
+	    <li th:each="num : *{#numbers.sequence(paging.startPage, paging.endPage)}" 
+	        class="page-item" 
+	        th:addclass="${num} == ${paging.page} ? active">
+	        <a class="page-link" th:href="|javascript:gopage(${num})|"  th:text="${num}">2</a></li>
+	    
+	    <li class="page-item" th:classappend="${paging.endPage} <= ${paging.lastPage} ? disabled">
+	        <a class="page-link" th:href="|javascript:gopage(${paging.endPage+1})|">Next</a></li>
+	  </ul>
+	</nav>
+	<!-- 페이징 종료 -->
+</body>
+</html>
