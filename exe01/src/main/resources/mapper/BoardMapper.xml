@@ -38,12 +38,7 @@
     </resultMap>
 	<!-- 단건조회 -->
 	<select id="selectBno" parameterType="Long" resultType="boardVO">
-		SELECT   BNO,
-		         TITLE,
-		         CONTENT,
-		         WRITER,
-		         REGDATE,
-		         UPDATEDATE
+		SELECT  *
 		FROM     TBL_BOARD
 		WHERE    BNO = #{bno}
 	</select>
@@ -63,13 +58,15 @@
 				bno,
 				title,
 				content,
-				writer
+				writer,
+				attach
 		)
 		values(
-			#{bno},
+			seq_board.NEXTVAL,
 			#{title},
 			#{content},
-			#{writer}
+			#{writer},
+			#{attach}
 		)
 	</insert>
 </mapper>

@@ -11,4 +11,6 @@ public interface BoardService {
 	BoardVO selectBno(Long bno);
 	//삭제
 	int deleteBoard(Long bno);
+	//등록
+	int insertBoard(BoardVO boardVO);
 }

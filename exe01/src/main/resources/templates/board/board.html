@@ -27,6 +27,16 @@
     <td>content</td>
     <td th:text="${board.content}">내용</td>
   </tr>
+  
+  <tr>
+    <td>첨부파일</td>
+    <td >
+    <a th:href="|/filedown/${board.attach}|" th:text="${board.attach}"></a>
+    <img th:src="|/upload/${board.attach}|">
+    </td>
+  </tr>
+  
+  
    <tr>
     <td>writer</td>
     <td th:text="${board.writer}">작성자</td>
