@@ -42,7 +42,7 @@ public class BoardServiceImpl implements BoardService {
 		
 		//첨부파일삭제(레코드 삭제).물리적인 파일 삭제
 		
-//		게시글삭제
+		//게시글삭제
 		return boardMapper.deleteBoard(bno);
 	}
 
